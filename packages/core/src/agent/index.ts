@@ -6,8 +6,8 @@ import { defiLlamaAdapter } from '../adapters/defillama.js';
 import { reservoirAdapter } from '../adapters/reservoir.js';
 
 const anthropic = new Anthropic({
-  baseURL: process.env.MINIMAX_BASE_URL || 'https://api.minimax.io/anthropic',
-  apiKey: process.env.MINIMAX_API_KEY,
+  baseURL: process.env.MIMO_BASE_URL || 'https://api.mimo.io/anthropic',
+  apiKey: process.env.MIMO_API_KEY,
 });
 
 export interface AgentContext {
@@ -22,7 +22,7 @@ export interface ToolResult {
   error?: string;
 }
 
-// Tool definition compatible with MiniMax/Anthropic format
+// Tool definition compatible with MiMo/Anthropic format
 interface ToolDefinition {
   name: string;
   description: string;
@@ -276,7 +276,7 @@ export class AgentLoop {
     const messages = [{ role: 'user' as const, content: input }];
     
     const response = await anthropic.messages.stream({
-      model: 'MiniMax-M2.5',
+      model: 'MiMo-M2.5',
       max_tokens: 2048,
       messages,
       tools: Array.from(this.tools.values()),

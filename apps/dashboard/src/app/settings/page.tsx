@@ -23,7 +23,7 @@ export default function SettingsPage() {
           </div>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-2">MiniMax API Key</label>
+              <label className="block text-sm font-medium mb-2">MiMo API Key</label>
               <input
                 type="password"
                 value={apiKey}

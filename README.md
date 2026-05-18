@@ -77,9 +77,9 @@ pnpm dev
 ## Environment Variables
 
 ```env
-# AI - MiniMax M2.5 Pro
-MINIMAX_API_KEY=your_api_key_here
-MINIMAX_BASE_URL=https://api.minimax.io/anthropic
+# AI - MiMo M2.5 Pro
+MIMO_API_KEY=your_api_key_here
+MIMO_BASE_URL=https://api.mimo.io/anthropic
 
 # Chains (public RPCs for demo)
 ETH_RPC_URL=https://eth.llamarpc.com
