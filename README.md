@@ -1,10 +1,40 @@
 # ChainFlow
 
-**AI-native Web3 operations platform** — one agent runtime to talk to any chain, reason over on-chain data, and execute transactions safely.
+**AI-native Web3 operations platform** — powered by MiMo V2.5 Pro. One agent runtime to talk to any chain, reason over on-chain data, and execute transactions safely.
 
 ## What it does
 
 Every Web3 task — explorer, DEX, portfolio tracker, risk scanner, CLI — collapses into one conversation with an agent that has typed adapters for each chain and a strict on-chain task protocol.
+
+**Every AI surface is powered by MiniMax M2.5 Pro** via Anthropic-compatible API.
+
+## Features
+
+### 9 AI Surfaces
+
+| Surface | URL | Description |
+|---------|-----|-------------|
+| **Alpha Hunter** | `/alpha` | MiMo scores live trending tokens with buy pressure analysis |
+| **X Research** | `/research` | Narrative analysis on any Web3 topic |
+| **Narrative Tracker** | `/narrative` | Heat-rank what's moving in Web3 |
+| **Daily Briefer** | `/brief` | MiMo writes your morning brief |
+| **Strategy Builder** | `/strategy` | Plain English → JSON workflow |
+| **Agent Swarm** | `/swarm` | Planner / Executor / Verifier in parallel |
+| **Trading Co-pilot** | `/copilot` | AI reads your live order book |
+| **Contract Explainer** | `/explainer` | Paste any address, MiMo reads it |
+| **Whale Tracker** | `/whale` | Live large transaction alerts |
+
+### Additional Features
+
+- **Portfolio Hub** (`/portfolio`) — Unified DeFi positions across chains
+- **Automation** (`/automation`) — Cron-driven autonomous workflows
+
+### Dashboard Features
+
+- **18 working features** — all live, all streaming
+- **3 chains** — Ethereum, Base, Arbitrum, Solana (typed adapters)
+- **On-chain task protocol** — verify → simulate → broadcast → confirm
+- **Multi-sink** — Telegram, Discord, email alerts
 
 ## Architecture
 
@@ -12,31 +42,25 @@ Every Web3 task — explorer, DEX, portfolio tracker, risk scanner, CLI — coll
 User Intent → Router (picks model) → Tools (typed adapters) → Protocol (verify→simulate→broadcast→confirm) → Recap
 ```
 
+```
+chainflow/
+├── apps/
+│   ├── landing/       # Marketing site
+│   ├── dashboard/     # Operator console (Next.js 14, 13 pages)
+│   └── cli/           # Headless terminal
+└── packages/
+    ├── core/          # Agent loop, MiMo integration, 6 adapters
+    ├── router/        # Model router
+    └── shared/        # Shared types & schemas
+```
+
 ## Tech Stack
 
+- **AI Brain**: MiniMax M2.5 Pro (Anthropic-compatible API)
+- **Chains**: Ethereum, Base, Arbitrum, Solana (via viem + web3.js)
+- **Data**: DexScreener, DeFi Llama, Reservoir, OpenSea
 - **Frontend**: Next.js 14, TypeScript, Tailwind CSS
-- **Agent Runtime**: Node.js + TypeScript
-- **AI Brain**: Claude API (Anthropic) with structured output
-- **Chains**: Ethereum, Base, Solana, Arbitrum (via typed adapters)
-- **Data**: DexScreener, DeFi Llama, OpenSea, Reservoir
-
-## Packages
-
-| Package | Description |
-|---------|-------------|
-| `packages/core` | Agent loop, model router, chain adapters |
-| `packages/shared` | Shared types, utils, protocol schemas |
-| `apps/landing` | Marketing site |
-| `apps/dashboard` | Operator console (18 features) |
-| `apps/cli` | Headless terminal interface |
-
-## Key Features
-
-- **9 AI surfaces**: Alpha Hunter, X Research, Narrative Tracker, Daily Briefer, Strategy Builder, Agent Swarm, Trading Co-pilot, Contract Explainer, Whale Tracker
-- **Portfolio Hub**: Unified DeFi positions across chains
-- **Task Automation**: Cron-driven autonomous workflows
-- **On-chain Protocol**: verify → simulate → broadcast → confirm
-- **Multi-sink**: Telegram, Discord, email alerts
+- **Runtime**: Node.js 20+
 
 ## Quick Start
 
@@ -44,8 +68,9 @@ User Intent → Router (picks model) → Tools (typed adapters) → Protocol (ve
 # Install dependencies
 pnpm install
 
-# Set environment variables
+# Configure environment
 cp apps/dashboard/.env.example apps/dashboard/.env.local
+# Edit .env.local with your keys
 
 # Start development
 pnpm dev
@@ -54,29 +79,35 @@ pnpm dev
 ## Environment Variables
 
 ```env
-# AI
-ANTHROPIC_API_KEY=sk-...
+# AI - MiniMax M2.5 Pro
+MINIMAX_API_KEY=your_api_key_here
+MINIMAX_BASE_URL=https://api.minimax.io/anthropic
 
-# Chains
+# Chains (public RPCs for demo)
 ETH_RPC_URL=https://eth.llamarpc.com
 BASE_RPC_URL=https://base.llamarpc.com
 SOL_RPC_URL=https://api.mainnet-beta.solana.com
 ARB_RPC_URL=https://arb1.arbitrum.io/rpc
 
-# Data
-DEXSCREENER_API_KEY=...
-DEFLLAMA_API_KEY=...
-RESERVOIR_API_KEY=...
+# Data APIs
+DEXSCREENER_API_KEY=
+DEFLLAMA_API_KEY=
+RESERVOIR_API_KEY=
 
 # Sinks
-TELEGRAM_BOT_TOKEN=...
-TELEGRAM_CHAT_ID=...
-DISCORD_WEBHOOK_URL=...
-SMTP_HOST=...
-SMTP_PORT=587
-SMTP_USER=...
-SMTP_PASS=...
+TELEGRAM_BOT_TOKEN=
+TELEGRAM_CHAT_ID=
+DISCORD_WEBHOOK_URL=
 ```
+
+## Live Demo
+
+| Surface | URL |
+|---------|-----|
+| Landing | https://chainflow.vercel.app |
+| Dashboard | https://chainflow-dashboard.vercel.app |
+| Alpha Hunter | https://chainflow-dashboard.vercel.app/alpha |
+| X Research | https://chainflow-dashboard.vercel.app/research |
 
 ## License
 

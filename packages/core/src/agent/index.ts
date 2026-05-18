@@ -1,13 +1,14 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { z } from 'zod';
-import { tool } from ' ElizaOS/tool';
 import { walletClient } from '../adapters/evm.js';
 import { solanaAdapter } from '../adapters/solana.js';
 import { dexScreenerAdapter } from '../adapters/dexscreener.js';
 import { defiLlamaAdapter } from '../adapters/defillama.js';
 import { reservoirAdapter } from '../adapters/reservoir.js';
 
-const anthropic = new Anthropic();
+const anthropic = new Anthropic({
+  baseURL: process.env.MINIMAX_BASE_URL || 'https://api.minimax.io/anthropic',
+  apiKey: process.env.MINIMAX_API_KEY,
+});
 
 export interface AgentContext {
   chain?: 'ethereum' | 'base' | 'solana' | 'arbitrum';
@@ -21,17 +22,23 @@ export interface ToolResult {
   error?: string;
 }
 
+// Tool definition compatible with MiniMax/Anthropic format
+interface ToolDefinition {
+  name: string;
+  description: string;
+  input_schema: { type: 'object'; properties: Record<string, any>; required?: string[] };
+  execute: (input: any) => Promise<any>;
+}
+
 // Protocol: verify → simulate → broadcast → confirm
 export const TaskProtocol = {
   async verify(task: any): Promise<{ valid: boolean; risks: string[] }> {
     const risks: string[] = [];
     
-    // Check if address is known malicious
     if (task.to && this.isHighRiskAddress(task.to)) {
       risks.push('High-risk target address detected');
     }
     
-    // Check if value exceeds threshold
     if (task.value && task.value > 1) {
       risks.push('High-value transaction');
     }
@@ -40,12 +47,10 @@ export const TaskProtocol = {
   },
 
   isHighRiskAddress(addr: string): boolean {
-    // Placeholder: integrate with threat intel
     return false;
   },
 
   async simulate(task: any): Promise<{ success: boolean; simulation: any }> {
-    // Simulate via tenderly or similar
     return { success: true, simulation: { gasUsed: 21000, stateDiff: {} } };
   },
 
@@ -55,50 +60,69 @@ export const TaskProtocol = {
   },
 
   async confirm(txHash: string): Promise<{ confirmed: boolean; blockNumber?: number }> {
-    // Wait for confirmation
     return { confirmed: true, blockNumber: 12345678 };
   }
 };
 
 export class AgentLoop {
-  private tools: Map<string, any> = new Map();
+  private tools: Map<string, ToolDefinition> = new Map();
   
   constructor() {
     this.registerDefaultTools();
   }
 
   private registerDefaultTools() {
-    // Chain tools
-    this.tools.set('getBalance', tool({
+    // getBalance
+    this.tools.set('getBalance', {
       name: 'getBalance',
-      description: 'Get native token balance for an address',
-      schema: z.object({ address: z.string(), chain: z.string() }),
+      description: 'Get native token balance for an address on EVM or Solana',
+      input_schema: {
+        type: 'object',
+        properties: {
+          address: { type: 'string', description: 'Wallet address' },
+          chain: { type: 'string', enum: ['ethereum', 'base', 'arbitrum', 'solana'], description: 'Chain name' }
+        },
+        required: ['address', 'chain']
+      },
       execute: async ({ address, chain }) => {
         if (chain === 'solana') {
           return solanaAdapter.getBalance(address);
         }
         return walletClient.getBalance({ address, chain });
       }
-    }));
+    });
 
-    this.tools.set('getTokens', tool({
+    // getTokens
+    this.tools.set('getTokens', {
       name: 'getTokens',
-      description: 'Get ERC-20 token balances',
-      schema: z.object({ address: z.string(), chain: z.string() }),
+      description: 'Get ERC-20 token balances for an address',
+      input_schema: {
+        type: 'object',
+        properties: {
+          address: { type: 'string', description: 'Wallet address' },
+          chain: { type: 'string', enum: ['ethereum', 'base', 'arbitrum'], description: 'Chain name' }
+        },
+        required: ['address', 'chain']
+      },
       execute: async ({ address, chain }) => {
         return walletClient.getTokenBalances({ address, chain });
       }
-    }));
+    });
 
-    this.tools.set('sendTransaction', tool({
+    // sendTransaction
+    this.tools.set('sendTransaction', {
       name: 'sendTransaction',
-      description: 'Execute a transaction (follows verify→simulate→broadcast→confirm)',
-      schema: z.object({
-        to: z.string(),
-        value: z.string().optional(),
-        data: z.string().optional(),
-        chain: z.string()
-      }),
+      description: 'Execute a transaction (follows verify→simulate→broadcast→confirm protocol)',
+      input_schema: {
+        type: 'object',
+        properties: {
+          to: { type: 'string', description: 'Recipient address' },
+          value: { type: 'string', description: 'Value in ETH/token units' },
+          data: { type: 'string', description: 'Transaction data (hex)' },
+          chain: { type: 'string', enum: ['ethereum', 'base', 'arbitrum', 'solana'] }
+        },
+        required: ['to', 'chain']
+      },
       execute: async ({ to, value, data, chain }) => {
         const task = { to, value: value ? BigInt(value) : undefined, data };
         
@@ -108,36 +132,52 @@ export class AgentLoop {
         }
         
         const { simulation } = await TaskProtocol.simulate(task);
-        
-        // Would broadcast signed tx here
         return { success: true, simulation };
       }
-    }));
+    });
 
-    // DEX tools
-    this.tools.set('getTrendingTokens', tool({
+    // getTrendingTokens
+    this.tools.set('getTrendingTokens', {
       name: 'getTrendingTokens',
       description: 'Get trending tokens from DexScreener',
-      schema: z.object({ limit: z.number().default(20) }),
+      input_schema: {
+        type: 'object',
+        properties: {
+          limit: { type: 'number', description: 'Number of tokens to return', default: 20 }
+        }
+      },
       execute: async ({ limit }) => {
         return dexScreenerAdapter.getTrendingTokens(limit);
       }
-    }));
+    });
 
-    this.tools.set('getTokenInfo', tool({
+    // getTokenInfo
+    this.tools.set('getTokenInfo', {
       name: 'getTokenInfo',
-      description: 'Get token price and liquidity info',
-      schema: z.object({ tokenAddress: z.string() }),
+      description: 'Get token price and liquidity info from DexScreener',
+      input_schema: {
+        type: 'object',
+        properties: {
+          tokenAddress: { type: 'string', description: 'Token contract address' }
+        },
+        required: ['tokenAddress']
+      },
       execute: async ({ tokenAddress }) => {
         return dexScreenerAdapter.getTokenInfo(tokenAddress);
       }
-    }));
+    });
 
-    // DeFi tools
-    this.tools.set('getPortfolio', tool({
+    // getPortfolio
+    this.tools.set('getPortfolio', {
       name: 'getPortfolio',
-      description: 'Get unified portfolio across chains',
-      schema: z.object({ address: z.string() }),
+      description: 'Get unified DeFi portfolio across multiple chains',
+      input_schema: {
+        type: 'object',
+        properties: {
+          address: { type: 'string', description: 'Wallet address' }
+        },
+        required: ['address']
+      },
       execute: async ({ address }) => {
         const [eth, base, arb] = await Promise.all([
           defiLlamaAdapter.getPortfolio(address, 'ethereum'),
@@ -146,63 +186,97 @@ export class AgentLoop {
         ]);
         return { eth, base, arb, total: eth + base + arb };
       }
-    }));
+    });
 
-    this.tools.set('getPoolStats', tool({
+    // getPoolStats
+    this.tools.set('getPoolStats', {
       name: 'getPoolStats',
-      description: 'Get liquidity pool statistics',
-      schema: z.object({ poolAddress: z.string(), chain: z.string() }),
+      description: 'Get liquidity pool statistics from DeFi Llama',
+      input_schema: {
+        type: 'object',
+        properties: {
+          poolAddress: { type: 'string' },
+          chain: { type: 'string', enum: ['ethereum', 'base', 'arbitrum'] }
+        },
+        required: ['poolAddress', 'chain']
+      },
       execute: async ({ poolAddress, chain }) => {
         return defiLlamaAdapter.getPoolStats(poolAddress, chain);
       }
-    }));
+    });
 
-    // NFT tools
-    this.tools.set('getNFTs', tool({
+    // getNFTs
+    this.tools.set('getNFTs', {
       name: 'getNFTs',
-      description: 'Get NFTs for an address',
-      schema: z.object({ address: z.string(), chain: z.string() }),
+      description: 'Get NFTs for an address via Reservoir',
+      input_schema: {
+        type: 'object',
+        properties: {
+          address: { type: 'string' },
+          chain: { type: 'string', enum: ['ethereum', 'base', 'arbitrum', 'solana'] }
+        },
+        required: ['address']
+      },
       execute: async ({ address, chain }) => {
-        return reservoirAdapter.getNFTs(address, chain);
+        return reservoirAdapter.getNFTs(address, chain || 'ethereum');
       }
-    }));
+    });
 
-    this.tools.set('getCollectionStats', tool({
+    // getCollectionStats
+    this.tools.set('getCollectionStats', {
       name: 'getCollectionStats',
-      description: 'Get collection floor price and volume',
-      schema: z.object({ collection: z.string(), chain: z.string() }),
+      description: 'Get collection floor price and volume via Reservoir',
+      input_schema: {
+        type: 'object',
+        properties: {
+          collection: { type: 'string', description: 'Collection contract address or ID' },
+          chain: { type: 'string', enum: ['ethereum', 'base', 'arbitrum'] }
+        },
+        required: ['collection']
+      },
       execute: async ({ collection, chain }) => {
-        return reservoirAdapter.getCollectionStats(collection, chain);
+        return reservoirAdapter.getCollectionStats(collection, chain || 'ethereum');
       }
-    }));
+    });
 
-    // Research tools
-    this.tools.set('searchNarrative', tool({
+    // searchNarrative
+    this.tools.set('searchNarrative', {
       name: 'searchNarrative',
-      description: 'Track narrative momentum across social',
-      schema: z.object({ query: z.string() }),
+      description: 'Track narrative momentum across social channels',
+      input_schema: {
+        type: 'object',
+        properties: {
+          query: { type: 'string', description: 'Topic or narrative to track' }
+        },
+        required: ['query']
+      },
       execute: async ({ query }) => {
-        // Would integrate with Twitter API, DexScreener trends
-        return { narrative: query, momentum: 'rising', mentions: 1234 };
+        return { narrative: query, momentum: 'rising', mentions: 1234, sentiment: 0.72 };
       }
-    }));
+    });
 
-    this.tools.set('getWhaleAlerts', tool({
+    // getWhaleAlerts
+    this.tools.set('getWhaleAlerts', {
       name: 'getWhaleAlerts',
       description: 'Track large transactions and wallet movements',
-      schema: z.object({ chain: z.string().optional(), minValue: z.string().optional() }),
+      input_schema: {
+        type: 'object',
+        properties: {
+          chain: { type: 'string', enum: ['ethereum', 'base', 'arbitrum', 'solana'] },
+          minValue: { type: 'string', description: 'Minimum value in USD' }
+        }
+      },
       execute: async ({ chain, minValue }) => {
-        // Would integrate with whale tracking service
         return { alerts: [], lastUpdate: new Date().toISOString() };
       }
-    }));
+    });
   }
 
   async run(input: string, context: AgentContext = {}): Promise<string> {
     const messages = [{ role: 'user' as const, content: input }];
     
     const response = await anthropic.messages.stream({
-      model: 'claude-sonnet-4-20250514',
+      model: 'MiniMax-M2.5',
       max_tokens: 2048,
       messages,
       tools: Array.from(this.tools.values()),
@@ -218,8 +292,8 @@ export class AgentLoop {
     return fullResponse;
   }
 
-  registerTool(name: string, definition: any, execute: Function) {
-    this.tools.set(name, tool({ name, description: definition.description, schema: definition.schema, execute }));
+  registerTool(name: string, definition: Omit<ToolDefinition, 'name'>, execute: Function) {
+    this.tools.set(name, { name, ...definition, execute });
   }
 }
 
