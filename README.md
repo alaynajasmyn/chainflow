@@ -98,6 +98,8 @@ TELEGRAM_CHAT_ID=
 DISCORD_WEBHOOK_URL=
 ```
 
+![ChainFlow Dashboard](docs/deployed_chainflow.png)
+
 ## Live Demo
 
 | Surface | URL |
