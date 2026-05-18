@@ -6,7 +6,7 @@
 
 Every Web3 task — explorer, DEX, portfolio tracker, risk scanner, CLI — collapses into one conversation with an agent that has typed adapters for each chain and a strict on-chain task protocol.
 
-**Every AI surface is powered by MiniMax M2.5 Pro** via Anthropic-compatible API.
+**Every AI surface is powered by MiMo V2.5 Pro** — recursive self-improvement AI with 204,800 context window.
 
 ## Features
 
@@ -56,11 +56,9 @@ chainflow/
 
 ## Tech Stack
 
-- **AI Brain**: MiniMax M2.5 Pro (Anthropic-compatible API)
-- **Chains**: Ethereum, Base, Arbitrum, Solana (via viem + web3.js)
-- **Data**: DexScreener, DeFi Llama, Reservoir, OpenSea
+- **AI**: MiMo V2.5 Pro
+- **Chains**: Ethereum, Base, Arbitrum, Solana
 - **Frontend**: Next.js 14, TypeScript, Tailwind CSS
-- **Runtime**: Node.js 20+
 
 ## Quick Start
 
