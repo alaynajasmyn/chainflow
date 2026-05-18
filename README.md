@@ -102,10 +102,9 @@ DISCORD_WEBHOOK_URL=
 
 | Surface | URL |
 |---------|-----|
-| Landing | https://chainflow.vercel.app |
-| Dashboard | https://chainflow-dashboard.vercel.app |
-| Alpha Hunter | https://chainflow-dashboard.vercel.app/alpha |
-| X Research | https://chainflow-dashboard.vercel.app/research |
+| Dashboard | https://dashboard-elite25.vercel.app |
+| Alpha Hunter | https://dashboard-elite25.vercel.app/alpha |
+| X Research | https://dashboard-elite25.vercel.app/research |
 
 ## License
 
