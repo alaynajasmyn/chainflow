@@ -6,7 +6,7 @@ import { defiLlamaAdapter } from '../adapters/defillama.js';
 import { reservoirAdapter } from '../adapters/reservoir.js';
 
 const anthropic = new Anthropic({
-  baseURL: process.env.MIMO_BASE_URL || 'https://api.mimo.io/anthropic',
+  baseURL: process.env.MIMO_BASE_URL || 'https://token-plan-sgp.xiaomimimo.com/v1',
   apiKey: process.env.MIMO_API_KEY,
 });
 

@@ -79,7 +79,7 @@ pnpm dev
 ```env
 # AI - MiMo M2.5 Pro
 MIMO_API_KEY=your_api_key_here
-MIMO_BASE_URL=https://api.mimo.io/anthropic
+MIMO_BASE_URL=https://token-plan-sgp.xiaomimimo.com/v1
 
 # Chains (public RPCs for demo)
 ETH_RPC_URL=https://eth.llamarpc.com
