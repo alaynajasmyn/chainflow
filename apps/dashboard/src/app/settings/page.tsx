@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, ChangeEvent } from 'react';
 import { Settings, Key, Bell, Globe, Shield, Save } from 'lucide-react';
 
 export default function SettingsPage() {
@@ -27,7 +27,7 @@ export default function SettingsPage() {
               <input
                 type="password"
                 value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
+                onChange={(e) => setApiKey((e.target as HTMLInputElement).value)}
                 placeholder="sk-..."
                 className="w-full bg-accent border border-border rounded-lg px-4 py-3 text-sm font-mono"
               />
@@ -71,7 +71,7 @@ export default function SettingsPage() {
               <input
                 type="password"
                 value={telegramToken}
-                onChange={(e) => setTelegramToken(e.target.value)}
+                onChange={(e) => setTelegramToken((e.target as HTMLInputElement).value)}
                 placeholder="123456:ABC-DEF..."
                 className="w-full bg-accent border border-border rounded-lg px-4 py-3 text-sm font-mono"
               />
@@ -89,7 +89,7 @@ export default function SettingsPage() {
               <input
                 type="text"
                 value={discordWebhook}
-                onChange={(e) => setDiscordWebhook(e.target.value)}
+                onChange={(e) => setDiscordWebhook((e.target as HTMLInputElement).value)}
                 placeholder="https://discord.com/api/webhooks/..."
                 className="w-full bg-accent border border-border rounded-lg px-4 py-3 text-sm"
               />
@@ -120,7 +120,7 @@ export default function SettingsPage() {
             <div className="flex items-center justify-between p-3 bg-accent rounded-lg">
               <div>
                 <div className="font-medium text-sm">High Value Alert</div>
-                <div className="text-xs text-muted-foreground">Alert for transactions > 1 ETH</div>
+                <div className="text-xs text-muted-foreground">Alert for transactions &gt; 1 ETH</div>
               </div>
               <input type="checkbox" defaultChecked className="w-5 h-5" />
             </div>

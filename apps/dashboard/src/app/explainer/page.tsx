@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, ChangeEvent } from 'react';
 import { FileCode, Copy, CheckCircle, AlertTriangle, ExternalLink } from 'lucide-react';
 
 const mockAnalysis = {
@@ -37,7 +37,7 @@ export default function ExplainerPage() {
           <input
             type="text"
             value={address}
-            onChange={(e) => setAddress(e.target.value)}
+            onChange={e => setAddress((e.target as HTMLInputElement).value)}
             onKeyDown={(e) => e.key === 'Enter' && handleAnalyze()}
             placeholder="Enter contract address (e.g., 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D)"
             className="flex-1 bg-accent border border-border rounded-lg px-4 py-3 text-sm font-mono"

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, ChangeEvent } from 'react';
 import { GitBranch, Play, Copy, ArrowRight } from 'lucide-react';
 
 const mockWorkflows = [
@@ -38,7 +38,7 @@ export default function StrategyPage() {
             </h3>
             <textarea
               value={plainEnglish}
-              onChange={(e) => setPlainEnglish(e.target.value)}
+              onChange={(e) => setPlainEnglish((e.target as HTMLTextAreaElement).value)}
               placeholder="Describe your strategy in plain English...
               
 Example: Every Monday at 9 AM, check if AI Agents momentum is above 70. If yes, buy $100 of ETH using drip.xyz on Base. Send me a Telegram notification with the result."

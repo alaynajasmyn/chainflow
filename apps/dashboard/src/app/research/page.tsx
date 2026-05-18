@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, ChangeEvent } from 'react';
 import { Search, TrendingUp, FileText, ExternalLink } from 'lucide-react';
 
 const mockResults = [
@@ -33,7 +33,7 @@ export default function ResearchPage() {
             <input
               type="text"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => setQuery((e.target as HTMLInputElement).value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
               placeholder="Ask about any Web3 topic, narrative, or trend..."
               className="w-full bg-accent border border-border rounded-lg pl-10 pr-4 py-3 text-sm"
