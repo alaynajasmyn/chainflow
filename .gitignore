@@ -1,0 +1,12 @@
+node_modules/
+.pnp
+.pnp.js
+.env
+.env.local
+dist/
+build/
+.next/
+out/
+*.log
+.DS_Store
+coverage/

@@ -1,0 +1,21 @@
+{
+  "name": "chainflow",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter @chainflow/dashboard dev",
+    "dev:landing": "pnpm --filter @chainflow/landing dev",
+    "dev:cli": "pnpm --filter @chainflow/cli run start",
+    "build": "pnpm --filter @chainflow/dashboard build && pnpm --filter @chainflow/landing build",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "pnpm": {
+    "workspace": [
+      "apps/*",
+      "packages/*"
+    ]
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  }
+}
